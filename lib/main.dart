@@ -2,8 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'language_selection_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+options: const FirebaseOptions(
+  apiKey: 'AIzaSyBT8kho5MugH5MLMlnQ6V3HZ6eVyCs6KL8',
+  appId: '1:146110729177:android:9ff2425adee5eb01cf67c8',
+  messagingSenderId: '146110729177',
+  projectId: 'multi-step-form-ad3e5',
+  storageBucket: 'multi-step-form-ad3e5.appspot.com', // NOTE: corrected .app to .com
+)
+
+
+  ); // Initialize Firebase
   runApp(const MyApp());
 }
 

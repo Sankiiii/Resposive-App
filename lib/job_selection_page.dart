@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';  
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JobSelectionPage extends StatefulWidget {
   final dynamic userDetails;
@@ -24,6 +25,18 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
     'job_PatientCareTaker',
     'job_DeliveryPerson'
   ];
+
+  void sendData(List<String> userList) async{
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  // Send data (add a new document)
+    await users.add({
+      'name': 'Sanket',
+      'email': 'sanket@example.com',
+      'timestamp': FieldValue.serverTimestamp(),
+    }).then((value) => print("Data Added"))
+      .catchError((error) => print("Failed to add data: $error"));
+  }
   
 
   
@@ -83,9 +96,10 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
                     ? () { 
                        List<String> updatedUserDetails = List.from(widget.userDetails);
                         updatedUserDetails.add(selectedJob!); // append state
-                      print(updatedUserDetails);
+                      // print(updatedUserDetails);
+                        sendData(updatedUserDetails);
                         showDialog(
-                            
+  
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(loc.submitted),  // localized string
@@ -93,7 +107,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                                child: Text(loc.ok),  // localized string
+                                child: Text(loc.ok),  // localized string  
                               )
                             ],
                           ),
