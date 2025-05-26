@@ -26,18 +26,28 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
     'job_DeliveryPerson'
   ];
 
-  void sendData(List<String> userList) async{
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
+ void sendData(List<String> userDetails) async {
+  CollectionReference users = FirebaseFirestore.instance.collection('userdetails');
 
-  // Send data (add a new document)
+  try {
     await users.add({
-      'name': 'Sanket',
-      'email': 'sanket@example.com',
+      'name': userDetails[1],
+      'phone': userDetails[2],
+      'age': userDetails[3],
+      'gender': userDetails[4],
+      'state': userDetails[5],
+      'job': userDetails[6], // now this is available
+      'lang': userDetails[0],
       'timestamp': FieldValue.serverTimestamp(),
-    }).then((value) => print("Data Added"))
-      .catchError((error) => print("Failed to add data: $error"));
+    });
+
+    print("✅ Data submitted successfully");
+  } catch (e) {
+    print("❌ Error submitting data: $e");
   }
-  
+}
+
+
 
   
   @override
@@ -96,7 +106,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
                     ? () { 
                        List<String> updatedUserDetails = List.from(widget.userDetails);
                         updatedUserDetails.add(selectedJob!); // append state
-                      // print(updatedUserDetails);
+                      print(updatedUserDetails);
                         sendData(updatedUserDetails);
                         showDialog(
   
