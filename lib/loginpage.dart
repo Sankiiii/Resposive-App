@@ -4,12 +4,20 @@ import 'l10n/app_localizations.dart';
 import 'state_selection_page.dart';
 
 class UserFormPage extends StatefulWidget {
+  final dynamic selectedLanguage;
+
+  const UserFormPage({super.key, required this.selectedLanguage});
+
   @override
   _UserFormPageState createState() => _UserFormPageState();
 }
 
 class _UserFormPageState extends State<UserFormPage> {
   final _formKey = GlobalKey<FormState>();
+
+  List<String> userDetails = [];
+
+  // late String selectedLanguage;
   String? _selectedGender;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -40,13 +48,18 @@ class _UserFormPageState extends State<UserFormPage> {
             key: _formKey,
             child: Column(
               children: [
-                Text(local.enterDetails, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(local.enterDetails,
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 SizedBox(height: 32),
-                _buildTextField(local.name, _nameController, TextInputType.name),
+                _buildTextField(
+                    local.name, _nameController, TextInputType.name),
                 SizedBox(height: 16),
-                _buildTextField(local.contactNumber, _phoneController, TextInputType.phone),
+                _buildTextField(
+                    local.contactNumber, _phoneController, TextInputType.phone),
                 SizedBox(height: 16),
-                _buildTextField(local.age, _ageController, TextInputType.number),
+                _buildTextField(
+                    local.age, _ageController, TextInputType.number),
                 SizedBox(height: 16),
                 _buildGenderDropdown(local),
                 SizedBox(height: 32),
@@ -54,9 +67,20 @@ class _UserFormPageState extends State<UserFormPage> {
                   onPressed: () {
                     final isValid = _formKey.currentState!.validate();
                     if (isValid) {
+                      userDetails = [
+                        widget.selectedLanguage.toString(),
+                        _nameController.text.trim(),
+                        _phoneController.text.trim(),
+                        _ageController.text.trim(),
+                        _selectedGender ?? '',
+                      ];
+
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StateSelectionPage()),
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              StateSelectionPage(userDetails: userDetails),
+                        ),
                       );
                     }
                   },
@@ -75,24 +99,29 @@ class _UserFormPageState extends State<UserFormPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, [TextInputType type = TextInputType.text]) {
+  Widget _buildTextField(String label, TextEditingController controller,
+      [TextInputType type = TextInputType.text]) {
     return TextFormField(
       controller: controller,
       keyboardType: type,
       decoration: InputDecoration(
         hintText: label,
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none),
         contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return '${AppLocalizations.of(context)!.pleaseEnter} $label';
         }
-        if (label == AppLocalizations.of(context)!.name && !RegExp(r'^[A-Za-z ]{1,20}$').hasMatch(value.trim())) {
+        if (label == AppLocalizations.of(context)!.name &&
+            !RegExp(r'^[A-Za-z ]{1,20}$').hasMatch(value.trim())) {
           return AppLocalizations.of(context)!.invalidName;
         }
-        if (label == AppLocalizations.of(context)!.contactNumber && !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
+        if (label == AppLocalizations.of(context)!.contactNumber &&
+            !RegExp(r'^\d{10}$').hasMatch(value.trim())) {
           return AppLocalizations.of(context)!.invalidPhone;
         }
         if (label == AppLocalizations.of(context)!.age) {
@@ -110,15 +139,20 @@ class _UserFormPageState extends State<UserFormPage> {
     return DropdownButtonFormField<String>(
       value: _selectedGender,
       items: [
-        DropdownMenuItem(value: local.genderMale, child: Text(local.genderMale)),
-        DropdownMenuItem(value: local.genderFemale, child: Text(local.genderFemale)),
-        DropdownMenuItem(value: local.genderOther, child: Text(local.genderOther)),
+        DropdownMenuItem(
+            value: local.genderMale, child: Text(local.genderMale)),
+        DropdownMenuItem(
+            value: local.genderFemale, child: Text(local.genderFemale)),
+        DropdownMenuItem(
+            value: local.genderOther, child: Text(local.genderOther)),
       ],
       onChanged: (val) => setState(() => _selectedGender = val),
       decoration: InputDecoration(
         hintText: local.selectGender,
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none),
         contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
       validator: (value) => value == null ? local.pleaseSelectGender : null,

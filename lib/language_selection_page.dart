@@ -86,7 +86,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         // Navigate to next page
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => UserFormPage()),
+                          MaterialPageRoute(builder: (context) => UserFormPage(selectedLanguage: selectedLanguage,)),
                         );
                       }
                     : null,

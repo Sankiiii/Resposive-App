@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';  
 
 class JobSelectionPage extends StatefulWidget {
+  final dynamic userDetails;
+
+
+  const JobSelectionPage({super.key , required this.userDetails});
+
   @override
   _JobSelectionPageState createState() => _JobSelectionPageState();
 }
 
 class _JobSelectionPageState extends State<JobSelectionPage> {
   String? selectedJob;
+
+  
 
   final List<String> jobKeys = [
     'job_BabySitter',
@@ -17,6 +24,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
     'job_PatientCareTaker',
     'job_DeliveryPerson'
   ];
+  
 
   
   @override
@@ -72,8 +80,12 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
               height: 50,
               child: ElevatedButton(
                 onPressed: selectedJob != null
-                    ? () {
+                    ? () { 
+                       List<String> updatedUserDetails = List.from(widget.userDetails);
+                        updatedUserDetails.add(selectedJob!); // append state
+                      print(updatedUserDetails);
                         showDialog(
+                            
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(loc.submitted),  // localized string
@@ -93,7 +105,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey,
                 ),
-                child: Text(loc.submit ?? 'submit'), 
+                child: Text(loc.submit), 
               ),
             )
           ],
