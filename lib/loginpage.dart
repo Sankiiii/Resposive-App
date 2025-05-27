@@ -67,12 +67,22 @@ class _UserFormPageState extends State<UserFormPage> {
                   onPressed: () {
                     final isValid = _formKey.currentState!.validate();
                     if (isValid) {
+                      // Map localized gender to English
+                      final genderMap = {
+                        local.genderMale: 'Male',
+                        local.genderFemale: 'Female',
+                        local.genderOther: 'Other',
+                      };
+
+                      final englishGender =
+                          genderMap[_selectedGender ?? ''] ?? '';
+
                       userDetails = [
                         widget.selectedLanguage.toString(),
                         _nameController.text.trim(),
                         _phoneController.text.trim(),
                         _ageController.text.trim(),
-                        _selectedGender ?? '',
+                        englishGender,
                       ];
 
                       Navigator.push(
