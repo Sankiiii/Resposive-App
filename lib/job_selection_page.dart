@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'l10n/app_localizations.dart';
 
 class JobSelectionPage extends StatefulWidget {
   final dynamic userDetails;
@@ -13,15 +15,13 @@ class JobSelectionPage extends StatefulWidget {
 
 class _JobSelectionPageState extends State<JobSelectionPage> {
   String? selectedJob;
-
-  late Map<String, String> jobMap; // localized display -> English name
+  late Map<String, String> jobMap;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final loc = AppLocalizations.of(context)!;
 
-    // Map localized job titles to English values
     jobMap = {
       loc.jobBabySitter: 'BabySitter',
       loc.jobCook: 'Cook',
@@ -32,7 +32,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
     };
   }
 
-  void sendData(List<String> userDetails) async {
+  Future<void> sendData(List<String> userDetails) async {
     CollectionReference users = FirebaseFirestore.instance.collection('userdetails');
 
     try {
@@ -42,7 +42,7 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
         'age': userDetails[3],
         'gender': userDetails[4],
         'state': userDetails[5],
-        'job': userDetails[6], // now this is in English
+        'job': userDetails[6],
         'lang': userDetails[0],
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -53,57 +53,101 @@ class _JobSelectionPageState extends State<JobSelectionPage> {
     }
   }
 
+  Future<void> sendEmailJS({
+    required String name,
+    required String phone,
+    required String job,
+    required List<String> userDetails
+  }) async {
+    const serviceId = 'service_fw627wt';
+    const templateId = 'template_a6hab6b';
+    const userId = 'iEAVuq8o0W_bqG5oi';
+
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'origin': 'http://localhost',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'service_id': serviceId,
+        'template_id': templateId,
+        'user_id': userId,
+        'template_params': {
+          'name': userDetails[1],
+          'phone': userDetails[2],
+          'age': userDetails[3],
+          'gender': userDetails[4],
+          'state': userDetails[5],
+          'job': userDetails[6],
+          'lang': userDetails[0],
+          'message': 'New user registration and job selection',
+          'time': DateTime.now().toString(), // or use your own format
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('✅ Email sent!');
+    } else {
+      print('❌ Failed to send email: ${response.body}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.selectJob)), // localized string
+      appBar: AppBar(title: Text(loc.selectJob)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              loc.whichJob, // localized string
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
+            Text(loc.whichJob, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 20),
             DropdownButtonFormField<String>(
               value: selectedJob,
               items: jobMap.keys
-                  .map((job) => DropdownMenuItem(
-                        value: job,
-                        child: Text(job),
-                      ))
+                  .map((job) => DropdownMenuItem(value: job, child: Text(job)))
                   .toList(),
               onChanged: (value) => setState(() => selectedJob = value),
               decoration: InputDecoration(
-                hintText: loc.selectJobType, // localized string
+                hintText: loc.selectJobType,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: selectedJob != null
-                    ? () {
+                    ? () async {
                         List<String> updatedUserDetails = List.from(widget.userDetails);
-                        final englishJob = jobMap[selectedJob!]; // get English version
-                        updatedUserDetails.add(englishJob!);
-                        print(updatedUserDetails);
-                        sendData(updatedUserDetails);
+                        final englishJob = jobMap[selectedJob!]!;
+                        updatedUserDetails.add(englishJob);
+
+                        await sendData(updatedUserDetails);
+                        await sendEmailJS(
+                          name: updatedUserDetails[1],
+                          phone: updatedUserDetails[2],
+                          job: englishJob,
+                          userDetails: updatedUserDetails
+                        );
+
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text(loc.submitted), // localized string
-                            content: Text(loc.jobConfirmation), // localized string
+                            title: Text(loc.submitted),
+                            content: Text(loc.jobConfirmation),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                                child: Text(loc.ok), // localized string
+                                child: Text(loc.ok),
                               )
                             ],
                           ),
