@@ -18,10 +18,15 @@ dependencies:
   intl: ^0.20.2
   firebase_core: ^3.13.1
   cloud_firestore: ^5.6.8
+  http: ^0.13.6  # or latest version
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+
+
 
 flutter:
   uses-material-design: true
